@@ -1,6 +1,7 @@
 use crate::owners_set::OwnersSet;
 use anyhow::anyhow;
 use lazy_static::lazy_static;
+use log::trace;
 use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
@@ -62,7 +63,13 @@ impl OwnersFileConfig {
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> anyhow::Result<OwnersFileConfig> {
-        let text = fs::read_to_string(&path)?;
+        let text: String = match fs::read_to_string(&path) {
+            Ok(contents) => contents,
+            Err(err) => {
+                trace!("Failed to read file: {:?}", err);
+                "".to_string()
+            }
+        };
         Self::from_text(
             text,
             path.as_ref()
