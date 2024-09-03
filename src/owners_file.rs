@@ -63,19 +63,18 @@ impl OwnersFileConfig {
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> anyhow::Result<OwnersFileConfig> {
-        let text: String = match fs::read_to_string(&path) {
-            Ok(contents) => contents,
+        match fs::read_to_string(&path) {
+            Ok(contents) => Self::from_text(
+                contents,
+                path.as_ref()
+                    .to_str()
+                    .expect("Error converting file path to string")
+                ),
             Err(err) => {
                 trace!("Failed to read file: {:?}", err);
-                "".to_string()
+                Ok(OwnersFileConfig::default())
             }
-        };
-        Self::from_text(
-            text,
-            path.as_ref()
-                .to_str()
-                .expect("Error converting file path to string"),
-        )
+        }
     }
 }
 
